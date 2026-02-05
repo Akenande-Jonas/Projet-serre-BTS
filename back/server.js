@@ -7,6 +7,7 @@ const mysql = require('mysql');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
+const http = require('http');
 
 dotenv.config();
 
@@ -69,8 +70,11 @@ app.get('/', (req, res) => {
     res.sendFile(path.join('/var/www/html/Serre/front', 'index.html'));
 });
 
+app.get('/TCW', (req, res) => {
+  const add = process.env.IPTCW;
+  res.redirect(add);
+});
+
 app.listen(PORT, () => {
   console.log(`Serveur démarré sur le port ${PORT}`);
 });
-
-//http://172.29.254.101/
