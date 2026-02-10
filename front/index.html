@@ -135,6 +135,49 @@ checkAuth();
                 </div>
                 <div class="card-chart" id="soil-chart"></div>
             </div>
+
+            <div class="status-card water-card" style="border-left: 4px solid #03A9F4;">
+                <div class="card-icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#03A9F4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2.69l5.74 5.74c.84.84 1.26 1.84 1.26 2.87A8.13 8.13 0 0 1 12 18.5a8.13 8.13 0 0 1-7-7.2c0-1.03.42-2.03 1.26-2.87L12 2.69z"/>
+                    </svg>
+                </div>
+                <div class="card-content">
+                    <h3 class="card-title">Conso. Eau</h3>
+                    <p class="card-value" id="valeur-conso">-- L</p>
+                    <p class="card-status">Total cumulé</p>
+                </div>
+            </div>
+
+            <div class="status-card tank-card" style="border-left: 4px solid #607D8B;">
+                <div class="card-icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#607D8B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M2 10h20"/>
+                        <path d="M4 10v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V10"/>
+                        <path d="M12 4v6"/>
+                        <path d="M8 6h8"/>
+                    </svg>
+                </div>
+                <div class="card-content">
+                    <h3 class="card-title">État Cuve</h3>
+                    <span id="etat-cuve" class="badge" style="display:inline-block; padding: 5px 10px; border-radius: 15px; background: #eee; font-weight:bold; font-size: 0.9em;">--</span>
+                    <p class="card-status" style="margin-top:5px;">Capteur Niveau</p>
+                </div>
+            </div>
+
+            <div class="status-card network-card" style="border-left: 4px solid #FF9800;">
+                <div class="card-icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#FF9800" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 12h-6l-2-2H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6z"/>
+                        <path d="M6 10V6a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v4"/>
+                    </svg>
+                </div>
+                <div class="card-content">
+                    <h3 class="card-title">Réseau Actif</h3>
+                    <strong id="etat-reseau" style="font-size: 1em; color: #333;">--</strong>
+                    <p class="card-status">Source d'eau</p>
+                </div>
+            </div>
         </section>
 
         <!-- Controls Section -->
