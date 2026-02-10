@@ -169,39 +169,63 @@ startWaterSupervision(); // Lancement au démarrage
 // ========================================
 
 async function getTCWData() {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     const socket = new net.Socket();
     const client = new Modbus.client.TCP(socket);
 
-    // Utilisation des variables d'env pour le TCW
     socket.connect({ host: process.env.serverIP, port: process.env.portMod });
 
     socket.on('connect', async () => {
       try {
         const tcw = new TCW241();
-        // Lecture des données
+
         const temp = await tcw.getTemp(client);
         const h1 = await tcw.getH1(client);
         const h2 = await tcw.getH2(client);
         const h3 = await tcw.getH3(client);
+        const relays = await tcw.getRelaysState(client);
 
         tcw.setTemperature(temp);
         tcw.setHumidites(h1, h2, h3);
 
         socket.end();
-        resolve(tcw.toJSON()); // Retourne { temperature: X, humiditeSol: Y ... }
+
+        resolve({
+          temperature: tcw.temperature,
+          h1: tcw.h1,
+          h2: tcw.h2,
+          h3: tcw.h3,
+          humiditeSol: tcw.humiditeMoyenne,
+          relays,
+          timestamp: tcw.timestamp
+        });
 
       } catch (err) {
         socket.end();
-        resolve({ temperature: null, humiditeSol: null }); // Retourne null si erreur
+        resolve({
+          temperature: null,
+          h1: null,
+          h2: null,
+          h3: null,
+          humiditeSol: null,
+          relays: null
+        });
       }
     });
 
-    socket.on('error', (err) => {
-        resolve({ temperature: null, humiditeSol: null }); // Pas de crash si TCW éteint
+    socket.on('error', () => {
+      resolve({
+        temperature: null,
+        h1: null,
+        h2: null,
+        h3: null,
+        humiditeSol: null,
+        relays: null
+      });
     });
   });
 }
+
 
 
 // ========================================
