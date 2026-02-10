@@ -10,7 +10,8 @@ const CONFIG = {
 
 const appState = {
     sensors: {
-        temperature: null
+        temperature: null,
+        humidity: null
     },
     isConnected: false,
     alerts: []
@@ -18,7 +19,8 @@ const appState = {
 
 const chartData = {
     timestamps: [],
-    temperature: []
+    temperature: [],
+    humidity: []
 };
 
 let charts = {};
@@ -55,7 +57,7 @@ async function fetchSensorData() {
     try {
         const token = localStorage.getItem("token");
 
-        const response = await fetch(`${CONFIG.apiUrl}/temp`, {
+        const response = await fetch(`${CONFIG.apiUrl}/info`, {
             headers: {
                 "Authorization": `Bearer ${token}`
             }
@@ -70,7 +72,8 @@ async function fetchSensorData() {
         const data = await response.json();
 
         updateSensorData({
-            temperature: parseFloat(data.temperature)
+            temperature: parseFloat(data.temperature),
+            humidity: parseFloat(data.humiditeSol)
         });
 
         updateConnectionStatus(true);
@@ -80,7 +83,6 @@ async function fetchSensorData() {
         updateConnectionStatus(false);
     }
 }
-
 
 function startDataPolling() {
     fetchSensorData();
@@ -93,6 +95,7 @@ function startDataPolling() {
 
 function updateSensorData(data) {
     appState.sensors.temperature = data.temperature;
+    appState.sensors.humidity = data.humidity;
 
     updateDisplay();
     addToHistory(data);
@@ -101,12 +104,16 @@ function updateSensorData(data) {
 }
 
 function updateDisplay() {
-    const { temperature } = appState.sensors;
+    const { temperature, humidity } = appState.sensors;
 
     document.getElementById('hero-temp').textContent =
         temperature !== null ? `${temperature.toFixed(1)}°C` : '--';
 
+    document.getElementById('hero-humidity').textContent =
+        humidity !== null ? `${humidity.toFixed(1)}%` : '--';
+
     updateCard('temp', temperature, '°C', getTemperatureStatus);
+    updateCard('humidity', humidity, '%', getHumidityStatus);
 }
 
 function updateCard(type, value, unit, statusFunction) {
@@ -133,6 +140,14 @@ function getTemperatureStatus(temp) {
     return { text: 'Trop chaud', level: 'danger' };
 }
 
+function getHumidityStatus(h) {
+    if (h < 20) return { text: 'Trop sec', level: 'danger' };
+    if (h < 40) return { text: 'Sec', level: 'warning' };
+    if (h <= 70) return { text: 'Optimal', level: 'success' };
+    if (h <= 85) return { text: 'Humide', level: 'warning' };
+    return { text: 'Trop humide', level: 'danger' };
+}
+
 function updateConnectionStatus(isConnected) {
     appState.isConnected = isConnected;
     const indicator = document.querySelector('.status-indicator');
@@ -157,14 +172,16 @@ function updateConnectionStatus(isConnected) {
 // ========================================
 
 function checkAlerts(data) {
-    const { temperature } = data;
+    const { temperature, humidity } = data;
 
     if (temperature !== null) {
-        if (temperature > 32) {
-            addAlert('danger', 'Température élevée', `La température est de ${temperature.toFixed(1)}°C.`);
-        } else if (temperature < 15) {
-            addAlert('danger', 'Température basse', `La température est de ${temperature.toFixed(1)}°C.`);
-        }
+        if (temperature > 32) addAlert('danger', 'Température élevée', `${temperature.toFixed(1)}°C`);
+        else if (temperature < 15) addAlert('danger', 'Température basse', `${temperature.toFixed(1)}°C`);
+    }
+
+    if (humidity !== null) {
+        if (humidity < 20) addAlert('warning', 'Humidité trop basse', `${humidity.toFixed(1)}%`);
+        else if (humidity > 85) addAlert('warning', 'Humidité trop élevée', `${humidity.toFixed(1)}%`);
     }
 }
 
@@ -219,6 +236,13 @@ function initializeCharts() {
                         borderColor: '#F44336',
                         backgroundColor: 'rgba(244, 67, 54, 0.1)',
                         tension: 0.4
+                    },
+                    {
+                        label: 'Humidité (%)',
+                        data: [],
+                        borderColor: '#2196F3',
+                        backgroundColor: 'rgba(33, 150, 243, 0.1)',
+                        tension: 0.4
                     }
                 ]
             },
@@ -236,10 +260,12 @@ function addToHistory(data) {
 
     chartData.timestamps.push(timeLabel);
     chartData.temperature.push(data.temperature);
+    chartData.humidity.push(data.humidity);
 
     if (chartData.timestamps.length > CONFIG.chartMaxPoints) {
         chartData.timestamps.shift();
         chartData.temperature.shift();
+        chartData.humidity.shift();
     }
 }
 
@@ -247,6 +273,7 @@ function updateCharts() {
     if (charts.temp) {
         charts.temp.data.labels = chartData.timestamps;
         charts.temp.data.datasets[0].data = chartData.temperature;
+        charts.temp.data.datasets[1].data = chartData.humidity;
         charts.temp.update('none');
     }
 }
