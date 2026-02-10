@@ -163,7 +163,7 @@ app.post('/api/inscription', (req, res) => {
 // 🌡️ Lecture Modbus : température
 // ========================================
 
-async function get() {
+async function getAllData() {
   return new Promise((resolve, reject) => {
     const socket = new net.Socket();
     const client = new Modbus.client.TCP(socket);
@@ -173,17 +173,10 @@ async function get() {
     socket.on('connect', async () => {
       try {
         const tcw = new TCW241();
-
-        const temp = await tcw.getTemp(client);
-        const h1 = await tcw.getH1(client);
-        const h2 = await tcw.getH2(client);
-        const h3 = await tcw.getH3(client);
-
-        tcw.setTemperature(temp);
-        tcw.setHumidites(h1, h2, h3);
+        const data = await tcw.getAll(client);
 
         socket.end();
-        resolve(tcw.toJSON());
+        resolve(data);
 
       } catch (err) {
         socket.end();
@@ -194,6 +187,7 @@ async function get() {
     socket.on('error', reject);
   });
 }
+
 
 
 
@@ -218,7 +212,7 @@ app.get('/', (req, res) => {
 
 app.get('/api/info', authMiddleware, async (req, res) => {
   try {
-    const data = await get();
+    const data = await getAllData();
     res.json({ success: true, ...data });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
@@ -280,7 +274,6 @@ async function saveLoop() {
 }
 
 setInterval(saveLoop, 10000);
-
 
 
 // ========================================

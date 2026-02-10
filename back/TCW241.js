@@ -43,6 +43,66 @@ class TCW241 {
         return (volts / 5) * 100;
     }
 
+    async setRelay1(client) {
+    const state = await client.readCoils(100, 1);
+    const current = state.response._body.valuesAsArray[0];
+    await client.writeSingleCoil(100, !current);
+}
+
+async setRelay2(client) {
+    const state = await client.readCoils(101, 1);
+    const current = state.response._body.valuesAsArray[0];
+    await client.writeSingleCoil(101, !current);
+}
+
+async setRelay3(client) {
+    const state = await client.readCoils(102, 1);
+    const current = state.response._body.valuesAsArray[0];
+    await client.writeSingleCoil(102, !current);
+}
+
+async setRelay4(client) {
+    const state = await client.readCoils(103, 1);
+    const current = state.response._body.valuesAsArray[0];
+    await client.writeSingleCoil(103, !current);
+}
+
+    async getRelaysState(client) {
+    const r1 = await client.readCoils(100, 1);
+    const r2 = await client.readCoils(101, 1);
+    const r3 = await client.readCoils(102, 1);
+    const r4 = await client.readCoils(103, 1);
+
+    return {
+        relay1: r1.response._body.valuesAsArray[0],
+        relay2: r2.response._body.valuesAsArray[0],
+        relay3: r3.response._body.valuesAsArray[0],
+        relay4: r4.response._body.valuesAsArray[0]
+    };
+}
+
+
+    async getAll(client) {
+    const temperature = await this.getTemp(client);
+    const h1 = await this.getH1(client);
+    const h2 = await this.getH2(client);
+    const h3 = await this.getH3(client);
+    const relays = await this.getRelaysState(client);
+
+    this.setTemperature(temperature);
+    this.setHumidites(h1, h2, h3);
+
+    return {
+        temperature: this.temperature,
+        h1: this.h1,
+        h2: this.h2,
+        h3: this.h3,
+        humiditeSol: this.humiditeMoyenne,
+        relays,
+        timestamp: this.timestamp
+    };
+}
+
     setTemperature(value) {
         this.temperature = value;
         this.timestamp = new Date();
