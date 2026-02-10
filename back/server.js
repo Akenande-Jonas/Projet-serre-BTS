@@ -243,6 +243,49 @@ app.get('/', (req, res) => {
 // 🚀 ROUTE API UNIFIÉE
 // ========================================
 
+// Route pour obtenir l'historique 24h pour les graphiques
+app.get('/api/historique-24h', authMiddleware, (req, res) => {
+  try {
+    const sql = `
+      SELECT 
+        id,
+        temperature,
+        h1,
+        h2,
+        h3,
+        humidite_moyenne,
+        timestamp
+      FROM capteurs
+      WHERE timestamp >= DATE_SUB(NOW(), INTERVAL 24 HOUR)
+      ORDER BY timestamp ASC
+    `;
+
+    db.query(sql, (err, results) => {
+      if (err) {
+        return res.status(500).json({ success: false, error: err.message });
+      }
+
+      // Formater les données pour Chart.js
+      const historique = results.map(row => ({
+        timestamp: new Date(row.timestamp).toLocaleTimeString('fr-FR'),
+        temperature: parseFloat(row.temperature),
+        h1: parseFloat(row.h1),
+        h2: parseFloat(row.h2),
+        h3: parseFloat(row.h3),
+        humiditeMoyenne: parseFloat(row.humidite_moyenne)
+      }));
+
+      res.json({
+        success: true,
+        data: historique,
+        count: historique.length
+      });
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 app.get('/api/info', authMiddleware, async (req, res) => {
   try {
     // 1. Récupérer les données TCW (Etudiant 1)

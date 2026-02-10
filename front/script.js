@@ -99,7 +99,13 @@ async function fetchSensorData() {
 
 function startDataPolling() {
     fetchSensorData();
+    fetchHistorique24h(); // Récupérer l'historique au démarrage
+    
+    // Mise à jour des données temps réel
     setInterval(fetchSensorData, CONFIG.updateInterval);
+    
+    // Mise à jour des graphiques tous les 5 secondes
+    setInterval(fetchHistorique24h, 5000);
 }
 
 // ========================================
@@ -265,7 +271,7 @@ function displayAlert(alert) {
 }
 
 // ========================================
-// GRAPHIQUES (Code existant conservé)
+// GRAPHIQUES DYNAMIQUES
 // ========================================
 
 function initializeCharts() {
@@ -276,12 +282,95 @@ function initializeCharts() {
             data: {
                 labels: [],
                 datasets: [
-                    { label: 'Température (°C)', data: [], borderColor: '#F44336', tension: 0.4 },
-                    { label: 'Humidité (%)', data: [], borderColor: '#2196F3', tension: 0.4 }
+                    { 
+                        label: 'Température (°C)', 
+                        data: [], 
+                        borderColor: '#F44336', 
+                        backgroundColor: 'rgba(244, 67, 54, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    },
+                    { 
+                        label: 'Humidité (%)', 
+                        data: [], 
+                        borderColor: '#2196F3', 
+                        backgroundColor: 'rgba(33, 150, 243, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }
                 ]
             },
-            options: { responsive: true, maintainAspectRatio: false }
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        max: 100
+                    }
+                }
+            }
         });
+    }
+}
+
+// Récupérer l'historique 24h depuis la base de données
+async function fetchHistorique24h() {
+    try {
+        const token = localStorage.getItem("token");
+        
+        const response = await fetch(`${CONFIG.apiUrl}/historique-24h`, {
+            headers: {
+                "Authorization": `Bearer ${token}`
+            }
+        });
+
+        if (response.status === 401) {
+            localStorage.removeItem("token");
+            window.location.href = "login.html";
+            return;
+        }
+
+        const result = await response.json();
+        if (result.success && result.data) {
+            updateChartsWithHistorique(result.data);
+        }
+    } catch (error) {
+        console.error("Erreur récupération historique:", error);
+    }
+}
+
+// Mettre à jour les graphiques avec les données de l'historique
+function updateChartsWithHistorique(data) {
+    if (!data || data.length === 0) return;
+
+    // Limiter à 20 derniers points pour une meilleure lisibilité
+    const maxPoints = 20;
+    const historique = data.slice(-maxPoints);
+
+    // Préparer les labels (timestamps)
+    const labels = historique.map(item => {
+        const time = item.timestamp;
+        // Si c'est déjà formaté, utilise-le sinon formate
+        return typeof time === 'string' ? time : new Date(time).toLocaleTimeString('fr-FR');
+    });
+
+    // Préparer les données
+    const temperatures = historique.map(item => item.temperature);
+    const humidites = historique.map(item => item.humiditeMoyenne);
+
+    // Mettre à jour le graphique Température & Humidité
+    if (charts.temp) {
+        charts.temp.data.labels = labels;
+        charts.temp.data.datasets[0].data = temperatures;
+        charts.temp.data.datasets[1].data = humidites;
+        charts.temp.update('none'); // 'none' = animation rapide sans redessiner tout
     }
 }
 
@@ -301,10 +390,6 @@ function addToHistory(data) {
 }
 
 function updateCharts() {
-    if (charts.temp) {
-        charts.temp.data.labels = chartData.timestamps;
-        charts.temp.data.datasets[0].data = chartData.temperature;
-        charts.temp.data.datasets[1].data = chartData.humidity;
-        charts.temp.update('none');
-    }
+    // Cette fonction est appelée par updateSensorData pour garder la compatibilité
+    // mais elle ne fait rien car les graphiques sont mis à jour par fetchHistorique24h
 }
