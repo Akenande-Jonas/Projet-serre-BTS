@@ -22,7 +22,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT;
 const JWT_SECRET = process.env.CODE;
 
 // ========================================
@@ -209,10 +209,10 @@ async function getTCWData() {
 // ========================================
 
 // Assure-toi que le chemin est bon par rapport à l'emplacement de server.js
-app.use(express.static(path.join(__dirname, '../front'))); 
+app.use(express.static('/var/www/html/Serre'));
 
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../front', 'index.html'));
+    res.sendFile(path.join('/var/www/html/Serre/front', 'index.html'));
 });
 
 // ========================================
