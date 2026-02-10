@@ -168,11 +168,8 @@ startWaterSupervision(); // Lancement au démarrage
 // 🌡️ GESTION TCW241 (ETUDIANT 1)
 // ========================================
 
-<<<<<<< HEAD
 async function getAllData() {
-=======
 async function getTCWData() {
->>>>>>> 52ba69c211f289c30dc4fb383679d76932e66db8
   return new Promise((resolve, reject) => {
     const socket = new net.Socket();
     const client = new Modbus.client.TCP(socket);
@@ -183,12 +180,10 @@ async function getTCWData() {
     socket.on('connect', async () => {
       try {
         const tcw = new TCW241();
-<<<<<<< HEAD
         const data = await tcw.getAll(client);
 
         socket.end();
         resolve(data);
-=======
         // Lecture des données
         const temp = await tcw.getTemp(client);
         const h1 = await tcw.getH1(client);
@@ -200,7 +195,6 @@ async function getTCWData() {
 
         socket.end();
         resolve(tcw.toJSON()); // Retourne { temperature: X, humiditeSol: Y ... }
->>>>>>> 52ba69c211f289c30dc4fb383679d76932e66db8
 
       } catch (err) {
         socket.end();
@@ -213,13 +207,6 @@ async function getTCWData() {
     });
   });
 }
-
-
-<<<<<<< HEAD
-
-
-=======
->>>>>>> 52ba69c211f289c30dc4fb383679d76932e66db8
 // ========================================
 // 🌍 EXPRESS STATIC
 // ========================================
@@ -237,10 +224,8 @@ app.get('/', (req, res) => {
 
 app.get('/api/info', authMiddleware, async (req, res) => {
   try {
-<<<<<<< HEAD
     const data = await getAllData();
     res.json({ success: true, ...data });
-=======
     // 1. Récupérer les données TCW (Etudiant 1)
     const tcwData = await getTCWData();
 
@@ -259,13 +244,11 @@ app.get('/api/info', authMiddleware, async (req, res) => {
         ...waterData 
     });
 
->>>>>>> 52ba69c211f289c30dc4fb383679d76932e66db8
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
 });
 
-<<<<<<< HEAD
 async function readTCW241() {
     return new Promise((resolve, reject) => {
         const socket = new net.Socket();
@@ -322,13 +305,6 @@ async function saveLoop() {
 
 setInterval(saveLoop, 10000);
 
-=======
-// Route bonus pour le bouton d'arrosage
-app.post('/api/arrosage', authMiddleware, (req, res) => {
-    besoinEauSimule = req.body.etat;
-    res.json({ success: true, etat: besoinEauSimule });
-});
->>>>>>> 52ba69c211f289c30dc4fb383679d76932e66db8
 
 // ========================================
 // START SERVER
