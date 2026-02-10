@@ -43,29 +43,26 @@ class TCW241 {
         return (volts / 5) * 100;
     }
 
-    async setRelay1(client) {
-    const state = await client.readCoils(100, 1);
-    const current = state.response._body.valuesAsArray[0];
-    await client.writeSingleCoil(100, !current);
+async setRelay1(client) {
+  const s = await client.readCoils(100, 1);
+  await client.writeSingleCoil(100, !s.response._body.valuesAsArray[0]);
 }
 
 async setRelay2(client) {
-    const state = await client.readCoils(101, 1);
-    const current = state.response._body.valuesAsArray[0];
-    await client.writeSingleCoil(101, !current);
+  const s = await client.readCoils(101, 1);
+  await client.writeSingleCoil(101, !s.response._body.valuesAsArray[0]);
 }
 
 async setRelay3(client) {
-    const state = await client.readCoils(102, 1);
-    const current = state.response._body.valuesAsArray[0];
-    await client.writeSingleCoil(102, !current);
+  const s = await client.readCoils(102, 1);
+  await client.writeSingleCoil(102, !s.response._body.valuesAsArray[0]);
 }
 
 async setRelay4(client) {
-    const state = await client.readCoils(103, 1);
-    const current = state.response._body.valuesAsArray[0];
-    await client.writeSingleCoil(103, !current);
+  const s = await client.readCoils(103, 1);
+  await client.writeSingleCoil(103, !s.response._body.valuesAsArray[0]);
 }
+
 
     async getRelaysState(client) {
     const r1 = await client.readCoils(100, 1);

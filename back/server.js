@@ -300,6 +300,44 @@ async function saveLoop() {
 
 setInterval(saveLoop, 10000);
 
+app.post('/api/relais/:numRelais', authMiddleware, async (req, res) => {
+  const num = parseInt(req.params.numRelais, 10);
+
+  if (![1, 2, 3, 4].includes(num)) {
+    return res.status(400).json({ success: false, message: "Relais invalide (1 à 4)" });
+  }
+
+  const socket = new net.Socket();
+  const client = new Modbus.client.TCP(socket);
+
+  socket.connect({ host: process.env.serverIP, port: process.env.portMod });
+
+  socket.on('connect', async () => {
+    try {
+      const tcw = new TCW241();
+
+      if (num === 1) await tcw.setRelay1(client);
+      if (num === 2) await tcw.setRelay2(client);
+      if (num === 3) await tcw.setRelay3(client);
+      if (num === 4) await tcw.setRelay4(client);
+
+      const relays = await tcw.getRelaysState(client);
+
+      socket.end();
+      res.json({ success: true, relays });
+
+    } catch (err) {
+      socket.end();
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
+  socket.on('error', err => {
+    res.status(500).json({ success: false, error: err.message });
+  });
+});
+
+
 // ========================================
 // START SERVER
 // ========================================
