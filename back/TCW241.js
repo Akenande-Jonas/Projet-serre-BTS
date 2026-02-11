@@ -123,6 +123,64 @@ async setRelay4(client) {
             timestamp: this.timestamp
         };
     }
+async regulate(client, consigne) {
+    const temp = this.temperature;
+    const hum = this.humiditeMoyenne;
+
+    const relays = await this.getRelaysState(client);
+
+    console.log("Régulation :", { temp, hum, consigne });
+
+    // ============================
+    // 🔥 RÉGULATION TEMPÉRATURE
+    // ============================
+    if (consigne.temperature !== null && temp !== null) {
+
+        // Trop froid → activer CHAUFFAGE (relay3)
+        if (temp < consigne.temperature - 0.5) {
+            await client.writeSingleCoil(102, false); // Fenêtre fermée
+            await client.writeSingleCoil(103, true);  // Chauffage ON
+        }
+
+        // Trop chaud → ouvrir FENÊTRE (relay4)
+        if (temp > consigne.temperature + 0.5) {
+            await client.writeSingleCoil(103, false); // Chauffage OFF
+            await client.writeSingleCoil(102, true);  // Fenêtre ouverte
+        }
+
+        // Température OK → tout OFF
+        if (temp >= consigne.temperature - 0.2 && temp <= consigne.temperature + 0.2) {
+            await client.writeSingleCoil(103, false); // Chauffage OFF
+            await client.writeSingleCoil(102, false); // Fenêtre fermée
+        }
+    }
+
+    // ============================
+    // 💧 RÉGULATION HUMIDITÉ
+    // ============================
+    if (consigne.humidite !== null && hum !== null) {
+
+        // Humidité trop basse → activer BRUMISATION (relay1)
+        if (hum < consigne.humidite - 2) {
+            await client.writeSingleCoil(100, true);
+        }
+
+        // Humidité trop haute → couper brumisation
+        if (hum > consigne.humidite + 2) {
+            await client.writeSingleCoil(100, false);
+        }
+
+        // Humidité OK → OFF
+        if (hum >= consigne.humidite - 1 && hum <= consigne.humidite + 1) {
+            await client.writeSingleCoil(100, false);
+        }
+    }
+
+    return true;
 }
+
+}
+
+
 
 module.exports = TCW241;

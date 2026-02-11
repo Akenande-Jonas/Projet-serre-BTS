@@ -286,6 +286,8 @@ app.get('/api/historique-24h', authMiddleware, (req, res) => {
   }
 });
 
+
+
 app.get('/api/info', authMiddleware, async (req, res) => {
   try {
     // 1. Récupérer les données TCW (Etudiant 1)
@@ -365,7 +367,7 @@ async function saveLoop() {
     }
 }
 
-setInterval(saveLoop, 10000);
+
 
 app.post('/api/relais/:numRelais', authMiddleware, async (req, res) => {
   const num = parseInt(req.params.numRelais, 10);
@@ -404,8 +406,50 @@ app.post('/api/relais/:numRelais', authMiddleware, async (req, res) => {
   });
 });
 
+async function regulateLoop() {
+    const socket = new net.Socket();
+    const client = new Modbus.client.TCP(socket);
 
-// ========================================
+    socket.connect({ host: process.env.serverIP, port: process.env.portMod });
+
+    socket.on('connect', async () => {
+        try {
+            const tcw = new TCW241();
+
+            // Lecture capteurs
+            const data = await tcw.getAll(client);
+
+            // Lecture consigne BDD
+            db.query("SELECT temperature, humidite_moyenne FROM Consigne LIMIT 1", async (err, rows) => {
+    if (err || rows.length === 0) {
+        console.error('Erreur lecture consigne :', err);
+        socket.end();
+        return;
+    }
+
+    const consigne = {
+        temperature: rows[0].temperature,
+        humidite: rows[0].humidite_moyenne
+    };
+
+    console.log('Consigne utilisée :', consigne);
+
+    await tcw.regulate(client, consigne);
+
+    socket.end();
+});
+
+
+        } catch (err) {
+            socket.end();
+        }
+    });
+}
+
+setInterval(regulateLoop, 10000);
+setInterval(saveLoop, 10000);
+
+// =======================================
 // START SERVER
 // ========================================
 
