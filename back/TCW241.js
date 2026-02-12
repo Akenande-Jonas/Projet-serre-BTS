@@ -5,6 +5,7 @@ class TCW241 {
         this.h2 = null;
         this.h3 = null;
         this.humiditeMoyenne = null;
+        this.humair = null;
         this.timestamp = new Date();
     }
 
@@ -126,6 +127,7 @@ async setRelay4(client) {
 async regulate(client, consigne) {
     const temp = this.temperature;
     const hum = this.humiditeMoyenne;
+    const humair = this.humair;
 
     const relays = await this.getRelaysState(client);
 
@@ -173,6 +175,27 @@ async regulate(client, consigne) {
         // Humidité OK → OFF
         if (hum >= consigne.humidite - 1 && hum <= consigne.humidite + 1) {
             await client.writeSingleCoil(101, false);
+        }
+    }
+
+    // ============================
+    // 💧 RÉGULATION HUMIDITE
+    // ============================
+    if (consigne.humiditeair !== null && humair !== null) {
+
+        // Humidité trop basse → activer BRUMISATION (relay1)
+        if (humair < consigne.humidite_air - 2) {
+            await client.writeSingleCoil(100, true);
+        }
+
+        // Humidité trop haute → couper brumisation
+        if (humair > consigne.humidite + 2) {
+            await client.writeSingleCoil(100, false);
+        }
+
+        // Humidité OK → OFF
+        if (humair >= consigne.humidite - 1 && hum <= consigne.humidite + 1) {
+            await client.writeSingleCoil(100, false);
         }
     }
 
