@@ -1,2 +1,3 @@
-coucou 
-message de validation de ma part.
+coucou,
+
+ici Jonas j'envoi un message de validation.
