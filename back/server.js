@@ -420,7 +420,7 @@ async function regulateLoop() {
             const data = await tcw.getAll(client);
 
             // Lecture consigne BDD
-            db.query("SELECT temperature, humidite_moyenne, humidite_air FROM Consigne LIMIT 1", async (err, rows) => {
+            db.query("SELECT temperature, humidite_moyenne, humidite_air, relai_0, relai_1, relai_2, relai_3 FROM Consigne LIMIT 1", async (err, rows) => {
     if (err || rows.length === 0) {
         console.error('Erreur lecture consigne :', err);
         socket.end();
@@ -430,7 +430,11 @@ async function regulateLoop() {
     const consigne = {
         temperature: rows[0].temperature,
         humidite: rows[0].humidite_moyenne,
-        humiditeair: rows[0].humidite_air
+        humiditeair: rows[0].humidite_air,
+        relay0: rows[0].relai_0,
+        relay1: rows[0].relai_1,
+        relay2: rows[0].relai_2,
+        relay3: rows[0].relai_3
     };
 
     console.log('Consigne utilisée :', consigne);
