@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administration - GreenHouse</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f4f9; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1 { color: #333; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background-color: #2c3e50; color: white; }
+        .btn { padding: 5px 10px; border: none; border-radius: 4px; cursor: pointer; color: white; margin-right: 5px; }
+        .btn-ban { background-color: #e74c3c; }
+        .btn-unban { background-color: #27ae60; }
+        .btn-mute { background-color: #f39c12; }
+        .btn-unmute { background-color: #3498db; }
+        .badge { padding: 3px 8px; border-radius: 12px; font-size: 0.8em; color: white; }
+        .badge-admin { background-color: #8e44ad; }
+        .badge-user { background-color: #95a5a6; }
+        .alert { color: red; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🛡️ Dashboard Administration</h1>
+    <p><a href="/">← Retour à la serre</a></p>
+    <div id="errorMsg" class="alert"></div>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Login</th>
+                <th>Email</th>
+                <th>Rôle</th>
+                <th>Statut</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="userTable">
+            </tbody>
+    </table>
+</div>
+
+<script>
+    const API_URL = "http://172.29.16.154/api"; // ⚠️ Vérifie ton IP
+    const token = localStorage.getItem("token");
+
+    // 1. Vérification sécurité immédiate
+    if (!token) window.location.href = "/front/login.html";
+
+    async function fetchUsers() {
+        try {
+            const res = await fetch(`${API_URL}/admin/users`, {
+                headers: { "Authorization": "Bearer " + token }
+            });
+            
+            const data = await res.json();
+            
+            if (!data.success) {
+                document.getElementById('errorMsg').innerText = "Accès refusé : " + data.message;
+                // Si accès refusé, redirection après 2s
+                setTimeout(() => window.location.href = "/", 2000);
+                return;
+            }
+
+            renderTable(data.users);
+
+        } catch (err) {
+            console.error(err);
+            document.getElementById('errorMsg').innerText = "Erreur de connexion serveur";
+        }
+    }
+
+    function renderTable(users) {
+        const tbody = document.getElementById('userTable');
+        tbody.innerHTML = '';
+
+        users.forEach(user => {
+            const isBanned = user.is_banned === 1;
+            const isMuted = user.is_muted === 1;
+            
+            const row = `
+                <tr style="${isBanned ? 'opacity:0.6; background:#fff0f0' : ''}">
+                    <td>${user.id}</td>
+                    <td><strong>${user.login}</strong></td>
+                    <td>${user.mail}</td>
+                    <td><span class="badge badge-${user.role}">${user.role}</span></td>
+                    <td>
+                        ${isBanned ? '🔴 Banni' : '🟢 Actif'} <br>
+                        ${isMuted ? '🔇 Muet' : '🔊 Parlant'}
+                    </td>
+                    <td>
+                        ${isBanned 
+                            ? `<button class="btn btn-unban" onclick="toggleBan(${user.id}, 0)">Débannir</button>`
+                            : `<button class="btn btn-ban" onclick="toggleBan(${user.id}, 1)">Bannir</button>`
+                        }
+                        
+                        ${isMuted 
+                            ? `<button class="btn btn-unmute" onclick="toggleMute(${user.id}, 0)">Rétablir Mvts</button>`
+                            : `<button class="btn btn-mute" onclick="toggleMute(${user.id}, 1)">Bloquer Mvts</button>`
+                        }
+                    </td>
+                </tr>
+            `;
+            tbody.innerHTML += row;
+        });
+    }
+
+    async function toggleBan(userId, status) {
+        if(!confirm(status ? "Bannir cet utilisateur ?" : "Débannir ?")) return;
+        callAdminApi('/admin/ban', { userId, status });
+    }
+
+    async function toggleMute(userId, status) {
+        callAdminApi('/admin/mute', { userId, status });
+    }
+
+    async function callAdminApi(endpoint, body) {
+        const res = await fetch(API_URL + endpoint, {
+            method: 'POST',
+            headers: { 
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + token 
+            },
+            body: JSON.stringify(body)
+        });
+        const data = await res.json();
+        if(data.success) {
+            fetchUsers(); // Rafraichir la liste
+        } else {
+            alert("Erreur: " + data.message);
+        }
+    }
+
+    fetchUsers();
+</script>
+
+</body>
+</html>

@@ -4,31 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Connexion - GreenHouse Connect</title>
-
     <link rel="stylesheet" href="login.css">
 </head>
 <script>
+// Vérification session active au chargement
 async function checkAuth() {
     const token = localStorage.getItem("token");
-if(token){
-    try {
-        const response = await fetch("http://172.29.16.154/api/temp", {
-            method: "GET",
-            headers: {
-                "Authorization": "Bearer " + token
+    if(token){
+        try {
+            // Vérifie si le token est toujours valide
+            const response = await fetch("http://172.29.16.154/api/temp", {
+                method: "GET",
+                headers: { "Authorization": "Bearer " + token }
+            });
+
+            if (response.status === 200) {
+                window.location.href = "/"; // Déjà connecté -> Accueil
             }
-        });
-
-        if (response.status === 200) {
-            window.location.href = "/";
+        } catch (err) {
+            localStorage.removeItem("token"); // Token invalide
         }
-    } catch (err) {
-        localStorage.removeItem("token");
-        window.location.href = "/front/login.html";
-    }
-} 
+    } 
 }
-
 checkAuth();
 </script>
 <body>
@@ -36,20 +33,63 @@ checkAuth();
 <div class="login-container">
     <h2>GreenHouse Connect</h2>
 
-    <div id="errorBox" class="error"></div>
-    <div id="successBox" class="success"></div>
+    <div id="errorBox" class="error" style="color:red; margin-bottom:10px;"></div>
+    <div id="successBox" class="success" style="color:green;"></div>
 
     <label>Login</label>
-    <input type="login" id="email" placeholder="" required>
+    <input type="text" id="email" placeholder="" required>
 
     <label>Mot de passe</label>
     <input type="password" id="password" placeholder="••••••••" required>
 
     <button onclick="login()">Se connecter</button>
-    Pas encore de compte ? <a href="/front/inscription.html">Créer un compte</a>
+    
+    <p style="margin-top:10px;">
+        Pas encore de compte ? <a href="/front/inscription.html">Créer un compte</a>
+    </p>
 </div>
 
-<script src="login.js"></script>
+<script src="login.js"></script> <script>
+    // SCRIPT INTEGRE SI BESOIN DE REMPLACER LOGIN.JS
+    async function login() {
+        const loginVal = document.getElementById("email").value;
+        const passwordVal = document.getElementById("password").value;
+        const errorBox = document.getElementById("errorBox");
+
+        errorBox.innerText = "";
+
+        try {
+            const response = await fetch("http://172.29.16.154/api/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ login: loginVal, password: passwordVal })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                // Stockage du token et du rôle
+                localStorage.setItem("token", data.token);
+                localStorage.setItem("role", data.role);
+                
+                // Redirection intelligente
+                if(data.role === 'admin') {
+                    // Optionnel: rediriger admin vers dashboard direct
+                    if(confirm("Connexion Admin réussie. Aller au Dashboard ?")) {
+                        window.location.href = "/front/admin.html";
+                        return;
+                    }
+                }
+                window.location.href = "/";
+            } else {
+                errorBox.innerText = "Erreur : " + data.message;
+            }
+        } catch (error) {
+            errorBox.innerText = "Erreur de connexion au serveur.";
+            console.error(error);
+        }
+    }
+</script>
 
 </body>
 </html>
