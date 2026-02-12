@@ -406,6 +406,38 @@ app.post('/api/relais/:numRelais', authMiddleware, async (req, res) => {
   });
 });
 
+
+// ========================================
+// 🚀 ROUTE API actionneur
+// ========================================
+
+// Récupérer tous les actionneurs
+app.get('/api/actionneurs', (req, res) => {
+    const sql = "SELECT * FROM actionneur";
+    db.query(sql, (err, results) => {
+        if (err) {
+            console.error("Erreur SQL :", err);
+            return res.status(500).json({ error: "Erreur serveur" });
+        }
+        res.json(results);
+    });
+});
+
+// Ajouter un actionneur
+app.post('/api/actionneurs', (req, res) => {
+    const { type, etat } = req.body;
+
+    const sql = "INSERT INTO actionneur (type, etat) VALUES (?, ?)";
+    db.query(sql, [type, etat], (err, result) => {
+        if (err) {
+            console.error("Erreur SQL :", err);
+            return res.status(500).json({ error: "Erreur serveur" });
+        }
+        res.json({ message: "Actionneur ajouté", id: result.insertId });
+    });
+});
+
+
 async function regulateLoop() {
     const socket = new net.Socket();
     const client = new Modbus.client.TCP(socket);

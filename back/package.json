@@ -10,15 +10,17 @@
   "description": "",
   "dependencies": {
     "bcryptjs": "^3.0.3",
+    "body-parser": "^2.2.2",
     "cors": "^2.8.6",
-    "dotenv": "^17.2.3",
+    "dotenv": "^17.2.4",
     "express": "^5.2.1",
     "http": "^0.0.1-security",
     "jsmodbus": "^4.0.10",
     "jsonwebtoken": "^9.0.3",
     "mysql": "^2.18.1",
     "net": "^1.0.2",
+    "path": "^0.12.7",
     "pm2": "^6.0.14",
-    "uuid": "^13.0.0"
+    "uuid": "^8.3.2"
   }
 }
