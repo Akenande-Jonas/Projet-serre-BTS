@@ -1,40 +1,43 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GreenHouse Connect - Serre Connectée Intelligente</title>
     <link rel="stylesheet" href="/front/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@400;600&display=swap"
+        rel="stylesheet">
 </head>
 <script>
-async function checkAuth() {
-    const token = localStorage.getItem("token");
+    async function checkAuth() {
+        const token = localStorage.getItem("token");
 
-    if (!token) {
-        window.location.href = "/front/login.html";
-        return;
-    }
+        if (!token) {
+            window.location.href = "/front/login.html";
+            return;
+        }
 
-    try {
-        const response = await fetch("http://172.29.16.154/api/info", {
-            method: "GET",
-            headers: {
-                "Authorization": "Bearer " + token
+        try {
+            const response = await fetch("http://172.29.16.154/api/info", {
+                method: "GET",
+                headers: {
+                    "Authorization": "Bearer " + token
+                }
+            });
+
+            if (response.status === 401) {
+                localStorage.removeItem("token");
+                window.location.href = "/front/login.html";
             }
-        });
-
-        if (response.status === 401) {
+        } catch (err) {
             localStorage.removeItem("token");
             window.location.href = "/front/login.html";
         }
-    } catch (err) {
-        localStorage.removeItem("token");
-        window.location.href = "/front/login.html";
     }
-}
 
-checkAuth();
+    checkAuth();
 </script>
 
 <body>
@@ -43,8 +46,10 @@ checkAuth();
         <div class="nav-container">
             <div class="logo">
                 <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-                    <path d="M20 5C20 5 10 10 10 20C10 25 12 28 15 30C12 28 10 25 10 20C10 15 15 12 20 10C25 12 30 15 30 20C30 25 28 28 25 30C28 28 30 25 30 20C30 10 20 5 20 5Z" fill="#4CAF50"/>
-                    <circle cx="20" cy="32" r="3" fill="#8BC34A"/>
+                    <path
+                        d="M20 5C20 5 10 10 10 20C10 25 12 28 15 30C12 28 10 25 10 20C10 15 15 12 20 10C25 12 30 15 30 20C30 25 28 28 25 30C28 28 30 25 30 20C30 10 20 5 20 5Z"
+                        fill="#4CAF50" />
+                    <circle cx="20" cy="32" r="3" fill="#8BC34A" />
                 </svg>
                 <span class="logo-text">GreenHouse</span>
             </div>
@@ -55,10 +60,15 @@ checkAuth();
                 <li><a href="#history" class="nav-link">Historique</a></li>
                 <li><a href="#settings" class="nav-link">Paramètres</a></li>
             </ul>
-            <div class="nav-status">
-                <span class="status-indicator online"></span>
-                <span class="status-text">Connecté</span>
-            </div>
+            <button id="btn-auth" onclick="gererConnexion()"
+                style="cursor: pointer; padding: 10px 20px; border-radius: 5px; border: none; font-weight: bold;">
+                Connexion
+            </button>
+
+            <button id="btn-admin" onclick="window.location.href='/front/admin.html'"
+                style="display: none; cursor: pointer; padding: 10px 20px; margin-right:10px; border-radius: 5px; border: none; background-color: #8e44ad; color: white; font-weight: bold;">
+                Admin
+            </button>
         </div>
     </nav>
 
@@ -92,9 +102,9 @@ checkAuth();
             <div class="status-card temperature-card">
                 <div class="card-icon">
                     <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-                        <rect x="12" y="4" width="8" height="18" rx="1" stroke="currentColor" stroke-width="2"/>
-                        <circle cx="16" cy="25" r="4" fill="currentColor"/>
-                        <line x1="16" y1="8" x2="16" y2="21" stroke="currentColor" stroke-width="2"/>
+                        <rect x="12" y="4" width="8" height="18" rx="1" stroke="currentColor" stroke-width="2" />
+                        <circle cx="16" cy="25" r="4" fill="currentColor" />
+                        <line x1="16" y1="8" x2="16" y2="21" stroke="currentColor" stroke-width="2" />
                     </svg>
                 </div>
                 <div class="card-content">
@@ -108,7 +118,8 @@ checkAuth();
             <div class="status-card humidity-card">
                 <div class="card-icon">
                     <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-                        <path d="M16 4C16 4 8 14 8 20C8 24.4 11.6 28 16 28C20.4 28 24 24.4 24 20C24 14 16 4 16 4Z" stroke="currentColor" stroke-width="2" fill="currentColor" opacity="0.3"/>
+                        <path d="M16 4C16 4 8 14 8 20C8 24.4 11.6 28 16 28C20.4 28 24 24.4 24 20C24 14 16 4 16 4Z"
+                            stroke="currentColor" stroke-width="2" fill="currentColor" opacity="0.3" />
                     </svg>
                 </div>
                 <div class="card-content">
@@ -122,10 +133,10 @@ checkAuth();
             <div class="status-card soil-card">
                 <div class="card-icon">
                     <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-                        <rect x="4" y="18" width="24" height="10" rx="2" fill="currentColor" opacity="0.3"/>
-                        <path d="M16 4L14 10L16 16L18 10L16 4Z" fill="currentColor"/>
-                        <circle cx="10" cy="23" r="2" fill="currentColor"/>
-                        <circle cx="22" cy="23" r="2" fill="currentColor"/>
+                        <rect x="4" y="18" width="24" height="10" rx="2" fill="currentColor" opacity="0.3" />
+                        <path d="M16 4L14 10L16 16L18 10L16 4Z" fill="currentColor" />
+                        <circle cx="10" cy="23" r="2" fill="currentColor" />
+                        <circle cx="22" cy="23" r="2" fill="currentColor" />
                     </svg>
                 </div>
                 <div class="card-content">
@@ -138,8 +149,10 @@ checkAuth();
 
             <div class="status-card water-card" style="border-left: 4px solid #03A9F4;">
                 <div class="card-icon">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#03A9F4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 2.69l5.74 5.74c.84.84 1.26 1.84 1.26 2.87A8.13 8.13 0 0 1 12 18.5a8.13 8.13 0 0 1-7-7.2c0-1.03.42-2.03 1.26-2.87L12 2.69z"/>
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#03A9F4" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path
+                            d="M12 2.69l5.74 5.74c.84.84 1.26 1.84 1.26 2.87A8.13 8.13 0 0 1 12 18.5a8.13 8.13 0 0 1-7-7.2c0-1.03.42-2.03 1.26-2.87L12 2.69z" />
                     </svg>
                 </div>
                 <div class="card-content">
@@ -151,25 +164,28 @@ checkAuth();
 
             <div class="status-card tank-card" style="border-left: 4px solid #607D8B;">
                 <div class="card-icon">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#607D8B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M2 10h20"/>
-                        <path d="M4 10v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V10"/>
-                        <path d="M12 4v6"/>
-                        <path d="M8 6h8"/>
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#607D8B" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M2 10h20" />
+                        <path d="M4 10v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V10" />
+                        <path d="M12 4v6" />
+                        <path d="M8 6h8" />
                     </svg>
                 </div>
                 <div class="card-content">
                     <h3 class="card-title">État Cuve</h3>
-                    <span id="etat-cuve" class="badge" style="display:inline-block; padding: 5px 10px; border-radius: 15px; background: #eee; font-weight:bold; font-size: 0.9em;">--</span>
+                    <span id="etat-cuve" class="badge"
+                        style="display:inline-block; padding: 5px 10px; border-radius: 15px; background: #eee; font-weight:bold; font-size: 0.9em;">--</span>
                     <p class="card-status" style="margin-top:5px;">Capteur Niveau</p>
                 </div>
             </div>
 
             <div class="status-card network-card" style="border-left: 4px solid #FF9800;">
                 <div class="card-icon">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#FF9800" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M22 12h-6l-2-2H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6z"/>
-                        <path d="M6 10V6a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v4"/>
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#FF9800" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 12h-6l-2-2H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6z" />
+                        <path d="M6 10V6a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v4" />
                     </svg>
                 </div>
                 <div class="card-content">
@@ -252,7 +268,7 @@ checkAuth();
                     </div>
                 </div>
             </div>
-            
+
             <!-- Bouton Appliquer -->
             <div class="controls-footer">
                 <button id="apply-controls-btn" class="btn-apply">
@@ -282,9 +298,9 @@ checkAuth();
             <div class="alerts-container" id="alerts-container">
                 <div class="alert alert-info">
                     <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                        <circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="2"/>
-                        <line x1="10" y1="6" x2="10" y2="10" stroke="currentColor" stroke-width="2"/>
-                        <circle cx="10" cy="13" r="1" fill="currentColor"/>
+                        <circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="2" />
+                        <line x1="10" y1="6" x2="10" y2="10" stroke="currentColor" stroke-width="2" />
+                        <circle cx="10" cy="13" r="1" fill="currentColor" />
                     </svg>
                     <div class="alert-content">
                         <h4>Système initialisé</h4>
@@ -321,4 +337,5 @@ checkAuth();
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="/front/script.js"></script>
 </body>
+
 </html>
