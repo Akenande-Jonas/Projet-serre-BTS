@@ -1,18 +1,30 @@
 <?php
-    header("Content-Type: application/json");
+header("Content-Type: application/json");
 
-    $endpoint = $_GET['endpoint'] ?? null;
+// Charger l'autoload de Composer (pour Dotenv)
+require_once __DIR__ . '/vendor/autoload.php';
 
-    if (!$endpoint) {
-        echo json_encode(["error" => "Aucun endpoint fourni"]);
-        exit;
-    }
+// Charger le .env
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+$dotenv->load();
 
-    $path = "api/endpoints/$endpoint.php";
+// Charger la connexion PDO sécurisée
+require_once __DIR__ . '/config/database.php';
 
-    if (file_exists($path)) {
-        require $path;
-    }else{
-        echo json_encode(["error" => "Endpoint introuvable"]);
-    }
-?>
+// Récupérer l'endpoint
+$endpoint = $_GET['endpoint'] ?? null;
+
+if (!$endpoint) {
+    echo json_encode(["error" => "Aucun endpoint fourni"]);
+    exit;
+}
+
+// Construire le chemin du fichier endpoint
+$path = __DIR__ . "/api/endpoints/$endpoint.php";
+
+if (file_exists($path)) {
+    require $path;
+} else {
+    http_response_code(404);
+    echo json_encode(["error" => "Endpoint introuvable"]);
+}
