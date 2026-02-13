@@ -139,7 +139,7 @@ async function fetchSensorData() {
 
         if (response.status === 401) {
             localStorage.removeItem("token");
-            window.location.href = "login.html";
+            window.location.href = "/front/login.html";
             return;
         }
 
@@ -174,6 +174,59 @@ function startDataPolling() {
     // Mise à jour des graphiques tous les 5 secondes
     setInterval(fetchHistorique24h, 5000);
 }
+
+
+
+// ==========================================
+// 🔐 GESTION CONNEXION / DECONNEXION
+// ==========================================
+
+function updateAuthButton() {
+    const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role");
+    const btn = document.getElementById("btn-auth");
+    const btnAdmin = document.getElementById("btn-admin");
+
+    if (token) {
+        // --- CAS : UTILISATEUR CONNECTÉ ---
+        btn.innerText = "Déconnexion";
+        btn.style.backgroundColor = "#e74c3c"; // Rouge
+        btn.style.color = "white";
+        
+        // Afficher le bouton Admin si c'est un admin
+        if (role === 'admin' && btnAdmin) {
+            btnAdmin.style.display = "inline-block";
+        }
+    } else {
+        // --- CAS : UTILISATEUR NON CONNECTÉ ---
+        btn.innerText = "Connexion";
+        btn.style.backgroundColor = "#2ecc71"; // Vert
+        btn.style.color = "white";
+        
+        if (btnAdmin) btnAdmin.style.display = "none";
+    }
+}
+
+function gererConnexion() {
+    const token = localStorage.getItem("token");
+
+    if (token) {
+        // --- ACTION : SE DÉCONNECTER ---
+        // 1. On supprime tout ce qui est stocké
+        localStorage.removeItem("token");
+        localStorage.removeItem("role");
+        
+        // 2. On recharge la page ou on redirige vers login
+        alert("Vous avez été déconnecté.");
+        window.location.href = "/front/login.html"; 
+    } else {
+        // --- ACTION : ALLER VERS CONNEXION ---
+        window.location.href = "/front/login.html";
+    }
+}
+
+// Lancer la vérification au chargement de la page
+document.addEventListener("DOMContentLoaded", updateAuthButton);
 
 // ========================================
 // MISE À JOUR DE L'INTERFACE
