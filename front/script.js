@@ -4,7 +4,7 @@
 
 const CONFIG = {
     // Si tu es sur la VM, vérifie que l'IP ici est la bonne pour accéder au back
-    apiUrl: 'http://172.29.60.60/api', // Ou '/api' si le front est servi par node
+    apiUrl: 'http://172.29.160.160/api', // Ou '/api' si le front est servi par node
     updateInterval: 5000,
     chartMaxPoints: 20,
 };
