@@ -1,4 +1,4 @@
-const API_URL = "http://172.29.16.154/api";
+const API_URL = "http://172.29.60.60/api";
 
 async function login() {
     const login = document.getElementById("email").value.trim();
